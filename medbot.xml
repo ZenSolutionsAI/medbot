@@ -1,0 +1,91 @@
+<context>
+    <pattern name="Doc" value="entity://docs"/>
+
+    <input pattern="/start">
+        <var name="Errors" value="javascript: 0" scope="context"/>
+        <output value="Здравстуйте! Это клиника ЗенМед.  К какому врачу вы хотите записаться?"/>
+
+        <context id="doc">
+            <input pattern="* {[* $Doc] [* $Date] [* $Time]} *">
+                <var name="Errors" value="javascript: $Errors + 1" if="empty($Doc)" scope="context"/>
+                <output value="Пожалуйста, оставайтесь на линии. Сейчас вам ответит оператор." if="$Errors gt 1"/>
+                <output if="empty($Doc)">
+                    <item value="Простите, не могли бы вы повторить название специалиста?"/>
+                    <item value="Простите, не могу разобрать название специалиста. Повторите пожалуйста."/>
+                </output>
+                <context id="date" if="$Errors lt 2 and full($Doc) and empty($Date)"/>
+                <context id="time" if="$Errors lt 2 and full($Doc) and empty($Time)"/>
+                <context id="record" if="$Errors lt 2 and full($Doc)"/>
+            </input>
+        </context>
+
+        <context id="date">
+            <output value="На какую дату желаете записаться?"/>
+            <input pattern="* {[$Date] [* $Time]} *">
+                <output value="Пожалуйста, назовите желаемую дату приёма" if="empty($Date)"/>
+                <context id="time" if="full($Date) and empty($Time)"/>
+                <context id="record" if="full($Date) and full($Time)"/>
+            </input>
+        </context>
+
+        <context id="time">
+            <output value="Какое время для вас предпочтительнее?"/>
+            <input pattern="* [$Time] *">
+                <output value="Пожалуйста, назовите желаемую время приёма" if="empty($Time)"/>
+                <context id="record" if="full($Time)"/>
+            </input>
+        </context>
+
+        <context id="record">
+            <var name="RecordDate" value='fmt($Date, "dd.MM", $req_lang)' scope="context"/>
+            <var name="RecordTime" value='fmt($Time, "HH:mm", $req_lang)' scope="context"/>
+            <output value="Спасибо. Врач $Doc свободен $RecordDate в $RecordTime. Запись подтверждена. Желаете заполнить предварительную анкету по телефону?"/>
+            <input pattern="* (да|давай*|ага|угу|желаю|желаем|хочу|хотим) *">
+                <var name="QuestionIndex" value="javascript: 0" scope="context"/>
+                <context id="questionnaire"/>
+            </input>
+            <input pattern="* (нет|не [желаю|желаем|хочу|хотим]) *">
+                <output value="Хорошо, врач $Doc будет ожидать вас. Всего доброго."/>
+                <context/>
+            </input>
+            <input pattern="*">
+                <output value="Простите, не могли бы вы повторить? Желаете заполнить предварительную анкету по телефону?"/>
+            </input>
+        </context>
+
+        <context id="questionnaire">
+            <output value="Анкета поможет врачу точнее поставить диагноз. Были ли у вас осложнения, связанные с анастезией?"/>
+            <input pattern="*">
+                <var name="QuestionIndex" value="javascript: $QuestionIndex+1" scope="context"/>
+                <var name="Question">
+                    <script>
+                        <![CDATA[
+                        var questions = [
+                            "Были ли у вас осложнения связанные с удалением зубов?",
+                            "Болеете ли в данный момент ОРЗ, гриппом или герпесом?",
+                            "Бывают ли у вас обмороки, головокружения или головные боли?",
+                            "Наблюдались ли вы у врача по поводу аритмии?",
+                            "Страдаете ли вы эпилепсией?",
+                            "Страдаете ли вы сахарным диабетом?"
+                        ];
+                        $QuestionIndex < questions.length ? questions[$QuestionIndex] : "";
+                        ]]>
+                    </script>
+                </var>
+
+                <output value="$Question" if="full($Question)"/>
+                <context id="name" if="empty($Question)"/>
+
+            </input>
+        </context>
+
+        <context id="name">
+            <output value="Спасибо, ваша анкета заполнена. Назовите пожалуйста ваше Имя и Фамилию"/>
+            <input pattern="*">
+                <output value="Спасибо! Врач $Doc будет ожидать вас $RecordDate в $RecordTime. Всего доброго."/>
+                <context/>
+            </input>
+        </context>
+
+    </input>
+</context>
