@@ -3,7 +3,7 @@
 
     <input pattern="/start">
         <var name="Errors" value="javascript: 0" scope="context"/>
-        <output value="Здравстуйте! Это клиника ЗенМед.  К какому врачу вы хотите записаться?"/>
+        <output value="Здравстуйте! Это клиника ЗенМьэд.  К какому врачу вы хотите записаться?"/>
 
         <context id="doc">
             <input pattern="* {[* $Doc] [* $Date] [* $Time]} *">
