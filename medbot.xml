@@ -37,7 +37,7 @@
         </context>
 
         <context id="record">
-            <var name="RecordDate" value='fmt($Date, "dd.MM", $req_lang)' scope="context"/>
+            <var name="RecordDate" value='fmt($Date, "dd MMM", $req_lang)' scope="context"/>
             <var name="RecordTime" value='fmt($Time, "HH:mm", $req_lang)' scope="context"/>
             <output value="Спасибо. Врач $Doc свободен $RecordDate в $RecordTime. Запись подтверждена. Желаете заполнить предварительную анкету по телефону?"/>
             <input pattern="* (да|давай*|ага|угу|желаю|желаем|хочу|хотим) *">
